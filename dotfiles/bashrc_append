@@ -146,3 +146,16 @@ export VISUAL="${VISUAL:-vim}"
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
+
+# -------------------------------------------------------------------
+# Help system
+# -------------------------------------------------------------------
+if [ -f "$HOME/.bash-prep/bp_help.sh" ]; then
+    . "$HOME/.bash-prep/bp_help.sh"
+fi
+
+# Login hint (once per shell, not on reload)
+if [ -z "$_BASH_PREP_LOADED" ]; then
+    export _BASH_PREP_LOADED=1
+    echo -e "\033[2mType 'bp' for bash-prep help\033[0m"
+fi

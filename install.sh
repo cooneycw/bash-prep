@@ -164,7 +164,29 @@ install_bash_aliases() {
 }
 
 # -----------------------------------------------------------------
-# Step 4: Patch ~/.bashrc
+# Step 4: Deploy help system
+# -----------------------------------------------------------------
+install_help() {
+    echo ""
+    echo -e "${BOLD}Step 4: Installing help system${RESET}"
+    echo "────────────────────────────────────────"
+
+    mkdir -p "$HOME/.bash-prep"
+
+    if [ -f "$HOME/.bash-prep/bp_help.sh" ]; then
+        if diff -q "$DOTFILES_DIR/bp_help.sh" "$HOME/.bash-prep/bp_help.sh" &>/dev/null; then
+            ok "~/.bash-prep/bp_help.sh already up to date"
+            return
+        fi
+        backup_file "$HOME/.bash-prep/bp_help.sh"
+    fi
+
+    cp "$DOTFILES_DIR/bp_help.sh" "$HOME/.bash-prep/bp_help.sh"
+    ok "Installed ~/.bash-prep/bp_help.sh (type 'bp' for help)"
+}
+
+# -----------------------------------------------------------------
+# Step 5: Patch ~/.bashrc
 # -----------------------------------------------------------------
 patch_bashrc() {
     echo ""
@@ -239,6 +261,7 @@ main() {
     install_tools
     install_inputrc
     install_bash_aliases
+    install_help
     patch_bashrc
 
     echo ""

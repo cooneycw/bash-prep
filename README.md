@@ -40,6 +40,20 @@ $
 | `jq` | - | JSON processor |
 | `htop` | `top` | Interactive process viewer |
 
+### Built-in Help
+Type `bp` anytime for a quick reference. Subcommands for focused help:
+
+| Command | Shows |
+|---------|-------|
+| `bp` | Overview of all help topics |
+| `bp keys` | Key bindings (Ctrl-R, Ctrl-T, etc.) |
+| `bp tools` | Installed tools and common patterns |
+| `bp git` | Git shortcut aliases |
+| `bp aliases` | All aliases (navigation, listing, safety) |
+| `bp functions` | Utility functions (extract, mkcd, etc.) |
+
+A login hint (`Type 'bp' for bash-prep help`) appears once per terminal session.
+
 ### Key Bindings
 | Key | Action |
 |-----|--------|

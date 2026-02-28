@@ -50,6 +50,12 @@ for file in "$HOME/.inputrc" "$HOME/.bash_aliases"; do
     fi
 done
 
+# Remove help system directory
+if [ -d "$HOME/.bash-prep" ]; then
+    rm -rf "$HOME/.bash-prep"
+    ok "Removed ~/.bash-prep/"
+fi
+
 # Show backup location
 BACKUP_BASE="$HOME/.bash-prep-backup"
 if [ -d "$BACKUP_BASE" ]; then
