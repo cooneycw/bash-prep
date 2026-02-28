@@ -1,0 +1,173 @@
+# ~/.bash_aliases - Shell aliases and functions
+# Sourced from ~/.bashrc
+
+# -------------------------------------------------------------------
+# Navigation
+# -------------------------------------------------------------------
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'
+
+# -------------------------------------------------------------------
+# Directory Listing
+# -------------------------------------------------------------------
+alias ls='ls --color=auto --group-directories-first'
+alias ll='ls -alFh'
+alias la='ls -A'
+alias l='ls -CF'
+alias lt='ls -lhtr'
+alias lS='ls -lhSr'
+
+# -------------------------------------------------------------------
+# Safety nets
+# -------------------------------------------------------------------
+alias mkdir='mkdir -pv'
+alias cp='cp -iv'
+alias mv='mv -iv'
+
+# -------------------------------------------------------------------
+# Human-readable defaults
+# -------------------------------------------------------------------
+alias df='df -h'
+alias du='du -sh'
+alias free='free -h'
+alias duf='df -hT'
+
+# -------------------------------------------------------------------
+# Grep
+# -------------------------------------------------------------------
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# -------------------------------------------------------------------
+# Git shortcuts
+# -------------------------------------------------------------------
+alias gs='git status'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate -20'
+alias gla='git log --oneline --graph --decorate --all -30'
+alias ga='git add'
+alias gc='git commit'
+alias gco='git checkout'
+alias gb='git branch'
+alias gp='git push'
+alias gpu='git pull'
+alias gst='git stash'
+
+# -------------------------------------------------------------------
+# Modern tool replacements (if installed)
+# -------------------------------------------------------------------
+# bat (better cat) - Ubuntu names it 'batcat'
+if command -v batcat &>/dev/null; then
+    alias bat='batcat'
+    alias cat='batcat --paging=never'
+    alias catp='batcat'
+fi
+
+# fd (better find) - Ubuntu names it 'fdfind'
+if command -v fdfind &>/dev/null; then
+    alias fd='fdfind'
+fi
+
+# tree with color and sensible defaults
+if command -v tree &>/dev/null; then
+    alias tree='tree -C --dirsfirst'
+    alias t='tree -L 2'
+    alias t3='tree -L 3'
+fi
+
+# ncdu for interactive disk usage
+if command -v ncdu &>/dev/null; then
+    alias du-interactive='ncdu'
+fi
+
+# htop over top
+if command -v htop &>/dev/null; then
+    alias top='htop'
+fi
+
+# -------------------------------------------------------------------
+# Process / Network
+# -------------------------------------------------------------------
+alias psg='ps aux | grep -v grep | grep -i'
+alias ports='ss -tulnp'
+alias myip='curl -s ifconfig.me'
+
+# -------------------------------------------------------------------
+# Misc utilities
+# -------------------------------------------------------------------
+alias path='echo $PATH | tr ":" "\n"'
+alias now='date +"%Y-%m-%d %H:%M:%S"'
+alias week='date +%V'
+alias reload='source ~/.bashrc'
+
+# -------------------------------------------------------------------
+# Functions
+# -------------------------------------------------------------------
+
+# mkcd: create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# extract: universal archive extractor
+extract() {
+    if [ -z "$1" ]; then
+        echo "Usage: extract <file>"
+        return 1
+    fi
+    if [ ! -f "$1" ]; then
+        echo "extract: '$1' is not a valid file"
+        return 1
+    fi
+    case "$1" in
+        *.tar.bz2)   tar xjf "$1"     ;;
+        *.tar.gz)    tar xzf "$1"     ;;
+        *.tar.xz)    tar xJf "$1"     ;;
+        *.bz2)       bunzip2 "$1"     ;;
+        *.rar)       unrar x "$1"     ;;
+        *.gz)        gunzip "$1"      ;;
+        *.tar)       tar xf "$1"      ;;
+        *.tbz2)      tar xjf "$1"     ;;
+        *.tgz)       tar xzf "$1"     ;;
+        *.zip)       unzip "$1"       ;;
+        *.Z)         uncompress "$1"  ;;
+        *.7z)        7z x "$1"        ;;
+        *.xz)        unxz "$1"        ;;
+        *.zst)       unzstd "$1"      ;;
+        *)           echo "extract: unsupported format '$1'" ;;
+    esac
+}
+
+# fkill: fuzzy-search and kill a process (requires fzf)
+if command -v fzf &>/dev/null; then
+    fkill() {
+        local pid
+        pid=$(ps -ef | sed 1d | fzf -m --header="Select process to kill" | awk '{print $2}')
+        if [ -n "$pid" ]; then
+            echo "Killing PID: $pid"
+            kill -"${1:-9}" "$pid"
+        fi
+    }
+fi
+
+# serve: quick HTTP server in current directory
+serve() {
+    local port="${1:-8000}"
+    echo "Serving on http://localhost:${port}"
+    python3 -m http.server "$port"
+}
+
+# jsonpp: pretty-print JSON (works with pipe or file)
+if command -v jq &>/dev/null; then
+    jsonpp() {
+        if [ -t 0 ] && [ -n "$1" ]; then
+            jq '.' "$1"
+        else
+            jq '.'
+        fi
+    }
+fi

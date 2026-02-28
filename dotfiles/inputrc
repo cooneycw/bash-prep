@@ -1,0 +1,47 @@
+# ~/.inputrc - Readline configuration
+# Applied to bash, python REPL, and any readline-based program
+
+# Case-insensitive tab completion
+set completion-ignore-case on
+
+# Treat hyphens and underscores as equivalent during completion
+set completion-map-case on
+
+# Show all completions at once if ambiguous (no double-tab needed)
+set show-all-if-ambiguous on
+
+# Show all completions if there are unmodified candidates
+set show-all-if-unmodified on
+
+# Add a trailing slash to completed directory names
+set mark-directories on
+set mark-symlinked-directories on
+
+# Color the common prefix in completions for easy scanning
+set colored-completion-prefix on
+
+# Color completions by file type (like ls --color)
+set colored-stats on
+
+# Do not ring terminal bell on completion
+set bell-style none
+
+# Show file type indicator in completion lists (/ for dirs, @ for symlinks, etc.)
+set visible-stats on
+
+# Limit the pager prompt for very long completion lists
+set completion-query-items 200
+
+# Up/Down arrow: search history using the text already typed
+# (type "git" then press Up to cycle through commands starting with "git")
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# Ctrl+Left / Ctrl+Right: move cursor by word
+"\e[1;5D": backward-word
+"\e[1;5C": forward-word
+
+# Allow UTF-8 input and display
+set input-meta on
+set output-meta on
+set convert-meta off

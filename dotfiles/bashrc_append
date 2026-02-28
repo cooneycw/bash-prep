@@ -1,0 +1,148 @@
+# ===================================================================
+# bash-prep: Shell usability enhancements
+# Appended by bash-prep installer - https://github.com/cooneycw/bash-prep
+# ===================================================================
+
+# -------------------------------------------------------------------
+# History Configuration
+# -------------------------------------------------------------------
+HISTCONTROL=ignoreboth:erasedups
+shopt -s histappend
+HISTSIZE=50000
+HISTFILESIZE=50000
+HISTTIMEFORMAT="%F %T  "
+HISTIGNORE="ls:ll:la:l:cd:pwd:exit:clear:history:bg:fg"
+
+# -------------------------------------------------------------------
+# Shell Options
+# -------------------------------------------------------------------
+shopt -s globstar       # ** matches recursively
+shopt -s cdspell        # auto-correct minor cd typos
+shopt -s dirspell       # auto-correct directory typos in completion
+shopt -s autocd         # type directory name to cd into it
+shopt -s nocaseglob     # case-insensitive globbing
+shopt -s cmdhist        # save multi-line commands as single history entry
+shopt -s lithist        # preserve newlines in multi-line history entries
+
+# -------------------------------------------------------------------
+# Enhanced Prompt
+# -------------------------------------------------------------------
+_C_RESET='\[\033[0m\]'
+_C_BOLD='\[\033[1m\]'
+_C_RED='\[\033[0;31m\]'
+_C_GREEN='\[\033[0;32m\]'
+_C_YELLOW='\[\033[0;33m\]'
+_C_BLUE='\[\033[0;34m\]'
+_C_CYAN='\[\033[0;36m\]'
+_C_BOLD_GREEN='\[\033[1;32m\]'
+_C_BOLD_BLUE='\[\033[1;34m\]'
+_C_BOLD_CYAN='\[\033[1;36m\]'
+_C_BOLD_RED='\[\033[1;31m\]'
+
+# Git status indicators for __git_ps1
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWSTASHSTATE=1
+export GIT_PS1_SHOWUNTRACKEDFILES=1
+export GIT_PS1_SHOWUPSTREAM="auto"
+
+# Source git prompt if not already loaded
+if ! command -v __git_ps1 &>/dev/null; then
+    for _gp in /usr/lib/git-core/git-sh-prompt \
+               /usr/share/git-core/contrib/completion/git-prompt.sh \
+               /etc/bash_completion.d/git-prompt; do
+        if [ -f "$_gp" ]; then
+            source "$_gp"
+            break
+        fi
+    done
+    unset _gp
+fi
+
+__build_prompt() {
+    local last_exit=$?
+
+    local user_host="${_C_BOLD_GREEN}\u@\h${_C_RESET}"
+    local work_dir="${_C_BOLD_BLUE}\w${_C_RESET}"
+
+    # Exit status indicator
+    local status_icon
+    if [ $last_exit -eq 0 ]; then
+        status_icon="${_C_GREEN}ok${_C_RESET}"
+    else
+        status_icon="${_C_BOLD_RED}err:${last_exit}${_C_RESET}"
+    fi
+
+    # Claude project context (e.g., [CPP #42]) if script exists
+    local claude_ctx=""
+    if [ -x "$HOME/.claude/scripts/prompt-context.sh" ]; then
+        claude_ctx="$($HOME/.claude/scripts/prompt-context.sh 2>/dev/null)"
+        if [ -n "$claude_ctx" ]; then
+            claude_ctx="${_C_BOLD_CYAN}${claude_ctx}${_C_RESET}"
+        fi
+    fi
+
+    # Git branch/status via __git_ps1
+    local git_info=""
+    if command -v __git_ps1 &>/dev/null; then
+        git_info="$(__git_ps1 " ${_C_YELLOW}(%s)${_C_RESET}")"
+    fi
+
+    PS1="\n[${status_icon}] ${user_host} ${claude_ctx}${work_dir}${git_info}\n${_C_BOLD}\$ ${_C_RESET}"
+}
+
+PROMPT_COMMAND="__build_prompt; history -a; history -c; history -r"
+
+# -------------------------------------------------------------------
+# FZF Configuration
+# -------------------------------------------------------------------
+if command -v fzf &>/dev/null; then
+    # Source fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd)
+    for _fzf_path in /usr/share/doc/fzf/examples/key-bindings.bash \
+                     /usr/share/fzf/key-bindings.bash \
+                     "$HOME/.fzf.bash"; do
+        if [ -f "$_fzf_path" ]; then
+            source "$_fzf_path"
+            break
+        fi
+    done
+    unset _fzf_path
+
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --info=inline"
+
+    # Use fd for file finding if available (respects .gitignore)
+    if command -v fdfind &>/dev/null; then
+        export FZF_DEFAULT_COMMAND="fdfind --type f --hidden --follow --exclude .git"
+        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+        export FZF_ALT_C_COMMAND="fdfind --type d --hidden --follow --exclude .git"
+    elif command -v fd &>/dev/null; then
+        export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
+        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+        export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
+    fi
+fi
+
+# -------------------------------------------------------------------
+# Tool Configuration
+# -------------------------------------------------------------------
+export LESS="-R -F -X --mouse"
+export LESSHISTFILE=-
+
+# Colored man pages
+export LESS_TERMCAP_mb=$'\e[1;31m'
+export LESS_TERMCAP_md=$'\e[1;36m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[1;44;33m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;32m'
+export LESS_TERMCAP_ue=$'\e[0m'
+
+# Default editor (only set if not already configured)
+export EDITOR="${EDITOR:-vim}"
+export VISUAL="${VISUAL:-vim}"
+
+# -------------------------------------------------------------------
+# Source aliases
+# -------------------------------------------------------------------
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
